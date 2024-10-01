@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+    <head th:replace="contenedor/tablero :: head"> </head>
+
+    <body>
+        <nav th:replace="contenedor/tablero :: navbar" ></nav>
+        <div class="container">
+            <div class="p-3 m-4 text-white rounded-3 fondo-inicio">
+                <div class="container-fluid py-5">
+                    <h1 class="display-5 fw-bold">Mi Primer CRUD en Web</h1>
+                    <br/>
+                    <h3>Actividades a Desarollar</h3>
+                    <ul>
+                        <a>Libreria de Diseño Web Bootstrap</a>
+                        <br/>
+                        <a>Primer CRUD</a>
+                        <br/>
+                        <a>Iconos Fontawesome</a>
+                        <br/>
+                        <a>Hiper Vinculos</a>
+                        <br/>
+                    </ul>
+                    <br/>
+                    <div class="text-center">
+                        <button class="btn btn-primary btn-lg col-3">
+                            Iniciar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <footer th:replace="contenedor/tablero :: footer"></footer>
+</html>
