@@ -6,4 +6,4 @@ Descripción
 Funcionalidades
 - 📊 Registro de gastos por categoría y fecha.
 - 🔐 Autenticación segura para proteger tus datos.
-- 🗂️ Historial detallado de transacciones.
+- 🗂️ Historial detallado.
