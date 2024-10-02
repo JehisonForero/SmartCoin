@@ -13,9 +13,9 @@ class Connection
 
 		$infoDB = array(
 
-			"database" => "infos",
-			"user" => "root",
-			"pass" => ""
+			"database" => "u145597152_grupocinco",
+			"user" => "grupo5",
+			"pass" => "Clave.jdc.2024.ins2"
 
 		);
 
