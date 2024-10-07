@@ -1,26 +1,27 @@
-<?php 
+<?php
 
 require_once "connection.php";
 require_once "get.model.php";
 
-class PutModel{
+class PutModel
+{
 
 	/*=============================================
 	Peticion Put para editar datos de forma dinámica
 	=============================================*/
 
-	static public function putData($table, $data, $id, $nameId){
+	static public function putData($table, $data, $id, $nameId)
+	{
 
 		/*=============================================
 		Validar el ID
 		=============================================*/
 
-		$response = GetModel::getDataFilter($table, $nameId, $nameId, $id, null,null,null,null);
-		
-		if(empty($response)){
+		$response = GetModel::getDataFilter($table, $nameId, $nameId, $id, null, null, null, null);
+
+		if (empty($response)) {
 
 			return null;
-
 		}
 
 		/*=============================================
@@ -30,9 +31,8 @@ class PutModel{
 		$set = "";
 
 		foreach ($data as $key => $value) {
-			
-			$set .= $key." = :".$key.",";
-			
+
+			$set .= $key . " = :" . $key . ",";
 		}
 
 		$set = substr($set, 0, -1);
@@ -44,13 +44,12 @@ class PutModel{
 
 		foreach ($data as $key => $value) {
 
-			$stmt->bindParam(":".$key, $data[$key], PDO::PARAM_STR);
-		
+			$stmt->bindParam(":" . $key, $data[$key], PDO::PARAM_STR);
 		}
 
-		$stmt->bindParam(":".$nameId, $id, PDO::PARAM_STR);
+		$stmt->bindParam(":" . $nameId, $id, PDO::PARAM_STR);
 
-		if($stmt -> execute()){
+		if ($stmt->execute()) {
 
 			$response = array(
 
@@ -58,13 +57,9 @@ class PutModel{
 			);
 
 			return $response;
-		
-		}else{
+		} else {
 
 			return $link->errorInfo();
-
 		}
-
 	}
-
 }

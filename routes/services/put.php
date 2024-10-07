@@ -3,25 +3,24 @@
 require_once "models/connection.php";
 require_once "controllers/put.controller.php";
 
-if(isset($_GET["id"]) && isset($_GET["nameId"])){
+if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
 	/*=============================================
 	Capturamos los datos del formulario
 	=============================================*/
-	
+
 	$data = array();
 	parse_str(file_get_contents('php://input'), $data);
-		
+
 	/*=============================================
 	Separar propiedades en un arreglo
 	=============================================*/
 
 	$columns = array();
-		
+
 	foreach (array_keys($data) as $key => $value) {
 
 		array_push($columns, $value);
-		
 	}
 
 	array_push($columns, $_GET["nameId"]);
@@ -32,26 +31,25 @@ if(isset($_GET["id"]) && isset($_GET["nameId"])){
 	Validar la tabla y las columnas
 	=============================================*/
 
-	if(empty(Connection::getColumnsData($table, $columns))){
+	if (empty(Connection::getColumnsData($table, $columns))) {
 
 		$json = array(
-		 	'status' => 400,
-		 	'results' => "Error: Fields in the form do not match the database"
+			'status' => 400,
+			'results' => "Error: Fields in the form do not match the database"
 		);
 
 		echo json_encode($json, http_response_code($json["status"]));
 
 		return;
-
 	}
 
-	if(isset($_GET["token"])){
+	if (isset($_GET["token"])) {
 
 		/*=============================================
 		Peticion PUT para usuarios no autorizados
 		=============================================*/
 
-		if($_GET["token"] == "no" && isset($_GET["except"])){
+		if ($_GET["token"] == "no" && isset($_GET["except"])) {
 
 			/*=============================================
 			Validar la tabla y las columnas
@@ -59,100 +57,90 @@ if(isset($_GET["id"]) && isset($_GET["nameId"])){
 
 			$columns = array($_GET["except"]);
 
-			if(empty(Connection::getColumnsData($table, $columns))){
+			if (empty(Connection::getColumnsData($table, $columns))) {
 
 				$json = array(
-				 	'status' => 400,
-				 	'results' => "Error: Fields in the form do not match the database"
+					'status' => 400,
+					'results' => "Error: Fields in the form do not match the database"
 				);
 
 				echo json_encode($json, http_response_code($json["status"]));
 
 				return;
-
 			}
 
 			/*=============================================
 			Solicitamos respuesta del controlador para crear datos en cualquier tabla
-			=============================================*/		
+			=============================================*/
 
 			$response = new PutController();
-			$response -> putData($table,$data,$_GET["id"],$_GET["nameId"]);
-			
-		/*=============================================
+			$response->putData($table, $data, $_GET["id"], $_GET["nameId"]);
+
+			/*=============================================
 		Peticion PUT para usuarios autorizados
 		=============================================*/
-
-		}else{
+		} else {
 
 			$tableToken = $_GET["table"] ?? "users";
 			$suffix = $_GET["suffix"] ?? "user";
 
-			$validate = Connection::tokenValidate($_GET["token"],$tableToken,$suffix);
+			$validate = Connection::tokenValidate($_GET["token"], $tableToken, $suffix);
 
 			/*=============================================
 			Solicitamos respuesta del controlador para editar datos en cualquier tabla
-			=============================================*/		
+			=============================================*/
 
-			if($validate == "ok"){
-				
+			if ($validate == "ok") {
+
 				$response = new PutController();
-				$response -> putData($table,$data,$_GET["id"],$_GET["nameId"]);
-
+				$response->putData($table, $data, $_GET["id"], $_GET["nameId"]);
 			}
 
 			/*=============================================
 			Error cuando el token ha expirado
-			=============================================*/	
+			=============================================*/
 
-			if($validate == "expired"){
+			if ($validate == "expired") {
 
 				$json = array(
-				 	'status' => 303,
-				 	'results' => "Error: The token has expired"
+					'status' => 303,
+					'results' => "Error: The token has expired"
 				);
 
 				echo json_encode($json, http_response_code($json["status"]));
 
 				return;
-
 			}
 
 			/*=============================================
 			Error cuando el token no coincide en BD
-			=============================================*/	
+			=============================================*/
 
-			if($validate == "no-auth"){
+			if ($validate == "no-auth") {
 
 				$json = array(
-				 	'status' => 400,
-				 	'results' => "Error: The user is not authorized"
+					'status' => 400,
+					'results' => "Error: The user is not authorized"
 				);
 
 				echo json_encode($json, http_response_code($json["status"]));
 
 				return;
-
 			}
-
 		}
 
-	/*=============================================
+		/*=============================================
 	Error cuando no envía token
-	=============================================*/	
-
-	}else{
+	=============================================*/
+	} else {
 
 		$json = array(
-		 	'status' => 400,
-		 	'results' => "Error: Authorization required"
+			'status' => 400,
+			'results' => "Error: Authorization required"
 		);
 
 		echo json_encode($json, http_response_code($json["status"]));
 
-		return;	
-
-	}	
-
-
+		return;
+	}
 }
