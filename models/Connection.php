@@ -15,7 +15,7 @@ class Connection
 
 			"database" => "u145597152_grupocinco",
 			"user" => "u145597152_ugrupocinco",
-			"pass" => "JEr;J+>3U/c7"
+			"pass" => "4bLa9O/j|I"
 
 		);
 
