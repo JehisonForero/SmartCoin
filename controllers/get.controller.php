@@ -43,6 +43,7 @@ class GetController{
 
 	}
 
+
 	/*=============================================
 	Peticiones GET con filtro entre tablas relacionadas
 	=============================================*/
@@ -107,7 +108,28 @@ class GetController{
 		$return -> fncResponse($response);
 
 	}
+	/*=============================================
+	Peticion Get que permite agrupar datos prueba cesar 
+	=============================================*/
+	/*static public function getDataGroupBy($table, $select, $groupBy, $orderBy, $orderMode, $startAt, $endAt) {
+        $response = GetModel::getDataGroupBy($table, $select, $groupBy, $orderBy, $orderMode, $startAt, $endAt);
+        
+        $return = new GetController();
+        $return->fncResponse($response);
+    }*/
 
+    /*=============================================
+	Peticion Get que permite agrupar datos entre tablas relacionadas prueba cesar 
+	=============================================*/
+	
+	static public function getGrupData($table, $select,$orderBy,$orderMode,$startAt,$endAt,$groupBy){
+
+		$response = GetModel::getData($table, $select,$orderBy,$orderMode,$startAt,$endAt,$groupBy);
+
+		$return = new GetController();
+		$return -> fncResponse($response);
+
+	}
 	/*=============================================
 	Respuestas del controlador
 	=============================================*/

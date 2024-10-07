@@ -10,6 +10,7 @@ $startAt = $_GET["startAt"] ?? null;
 $endAt = $_GET["endAt"] ?? null;
 $filterTo = $_GET["filterTo"] ?? null;
 $inTo = $_GET["inTo"] ?? null;
+$groupBy = $_GET["groupBy"] ?? null; //agrego cesar es una prueba borrar
 
 $response = new GetController();
 
@@ -27,7 +28,7 @@ Peticiones GET sin filtro entre tablas relacionadas
 
 }else if(isset($_GET["rel"]) && isset($_GET["type"]) && $table == "relations" && !isset($_GET["linkTo"]) && !isset($_GET["equalTo"])){
 
-	$response -> getRelData($_GET["rel"],$_GET["type"],$select,$equalTo,$orderBy,$orderMode,$startAt,$endAt);
+	$response -> getRelData($_GET["rel"],$_GET["type"],$select,$orderBy,$orderMode,$startAt,$endAt);
 	
 /*=============================================
 Peticiones GET con filtro entre tablas relacionadas
@@ -70,13 +71,52 @@ Peticiones GET para selección de rangos con relaciones
 
 	$response -> getRelDataRange($_GET["rel"],$_GET["type"],$select,$_GET["linkTo"],$_GET["between1"],$_GET["between2"],$orderBy,$orderMode,$startAt,$endAt, $filterTo, $inTo);
 
-}else{
+//}else{
 
 	/*=============================================
 	Peticiones GET sin filtro
 	=============================================*/
 
-	$response -> getData($table, $select,$orderBy,$orderMode,$startAt,$endAt);
+	//$response -> getData($table, $select,$orderBy,$orderMode,$startAt,$endAt);
 
 
+//}
+
+/* codig oesar pruena para agrupar datos*/
+
+/*}else if (!isset($_GET["rel"]) && !isset($_GET["type"]) && !isset($_GET["linkTo"]) && !isset($_GET["between1"]) && !isset($_GET["between2"]) && isset($groupBy)) {
+
+    $response->getDataGroupBy($table, $select, $groupBy, $orderBy, $orderMode, $startAt, $endAt);*/
+/*  prueba agrupar con tablas relacionadas */
+/*=============================================
+    Peticiones GET Para agrupar datos nueva prueba cesar 
+ ==============================================*/
+} else if(isset($_GET["rel"]) && isset($_GET["type"]) && $table == "relations" && !isset($_GET["linkTo"]) && !isset($_GET["equalTo"])){
+
+	$response -> getGrupData($_GET["rel"],$_GET["type"],$select,$orderBy,$orderMode,$startAt,$endAt);
 }
+ else {
+    /*=============================================
+    Peticiones GET sin filtro
+    ==============================================*/
+    $response->getData($table, $select, $orderBy, $orderMode, $startAt, $endAt);
+}
+
+
+
+
+
+
+//else {
+    /*=============================================
+    Peticiones GET sin filtro
+    ==============================================*/
+    //$response->getData($table, $select, $orderBy, $orderMode, $startAt, $endAt);
+//}
+
+
+
+
+
+
+

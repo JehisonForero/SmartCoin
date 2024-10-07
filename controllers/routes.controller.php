@@ -1,8 +1,18 @@
 <?php
+
+
 class RoutesController{
-    /* ruta principal de nuestra api*/
-    public function index(){
-       include "routes/routes.php"; 
-    }
+
+
+	/*=============================================
+	Ruta Principal
+	=============================================*/
+	
+	public function index(){
+
+		include "routes/routes.php";
+
+	}
+
+
 }
-?>

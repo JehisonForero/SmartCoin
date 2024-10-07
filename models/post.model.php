@@ -1,35 +1,63 @@
-<?php
-require_once "Connection.php";
+<?php 
+
+require_once "connection.php";
 
 class PostModel{
-    /* crear una peticion para crear datos de forma dinamic*/
-    static public function postData($table, $data){
-    $columns = "";
-    $params = "";
-    foreach($data as $key => $value){
-        $columns .=$key.",";
-        $params .=":".$key.",";
-    }
-    $columns = substr($columns, 0 -1);
-    $columns = substr($params, 0 ,-1);
 
-    $sql="INSERT INTO $table ($columns) VALUE ($params)";
+	/*=============================================
+	Peticion POST para crear datos de forma dinámica
+	=============================================*/
 
-    $link = Connection::connect();
-    $stmp=$link ->prepare($sql);
-    foreach($data as $key => $value){
-        $stmp ->bindParam(":".$key,$data[$key],PDO::PARAM_STR);
-    }
-        if ($stmp ->execute()){
-        $response=array(
-            "lastaId"=>$link -> lastInsertId(),
-            "coment" =>"proceso exitoso"
-        );
-        return $response;
-        }else{
-        return $link->errorInfo();
-        }
-    }
+	static public function postData($table, $data){
+
+		$columns = "";
+		$params = "";
+		
+		
+
+		foreach ($data as $key => $value) {
+			
+			$columns .= $key.",";
+			
+			$params .= ":".$key.",";
+			
+		}
+		
+		
+
+		$columns = substr($columns, 0, -1);
+		$params = substr($params, 0, -1);
+
+
+		$sql = "INSERT INTO $table ($columns) VALUES ($params)";
+
+		$link = Connection::connect();
+		$stmt = $link->prepare($sql);
+
+		foreach ($data as $key => $value) {
+
+			$stmt->bindParam(":".$key, $data[$key], PDO::PARAM_STR);
+		
+		}
+
+		if($stmt -> execute()){
+
+			$response = array(
+
+				"lastId" => $link->lastInsertId(),
+				"comment" => "The process was successful"
+				
+			);
+
+			return $response;
+		
+		}else{
+
+			return $link->errorInfo();
+
+		}
+
+
+	}
 
 }
-?>
