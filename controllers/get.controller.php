@@ -111,6 +111,69 @@ class GetController
 	}
 
 	/*=============================================
+	 Método para verificar si el código es válido
+	=============================================*/
+
+	public function isCodeValid($email, $code)
+	{
+		$storedTokenData = $this->getStoredToken($email); // Recuperar el código y la expiración
+
+		if ($storedTokenData['reset_code_user'] === $code) {
+			$currentDateTime = date("Y-m-d H:i:s");
+			if ($currentDateTime <= $storedTokenData['reset_code_exp_user']) {
+				return true; // Código válido
+			} else {
+				echo json_encode(['message' => 'Code expired']);
+				return false;
+			}
+		} else {
+			echo json_encode(['message' => 'Invalid code']);
+			return false;
+		}
+	}
+
+	/*=============================================
+	  Maneja la confirmación del reseteo de contraseña
+	=============================================*/
+
+	public function handlePasswordReset()
+	{
+		if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['code'], $_POST['new_password'])) {
+			$email = $_POST['email'];
+			$code = $_POST['code'];
+			$newPassword = $_POST['new_password'];
+
+			if ($this->isCodeValid($email, $code)) {
+				$hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT); // Hashea la nueva contraseña
+				$this->updatePasswordInDatabase($email, $hashedPassword); // Actualiza la contraseña en la base de datos
+				echo json_encode(['message' => 'Password updated successfully']);
+			}
+		}
+	}
+
+	/*=============================================
+	Método para obtener el código de reseteo y su expiración de la base de datos
+	=============================================*/
+
+	private function getStoredToken($email)
+	{
+		// Lógica para obtener el token de la base de datos
+		// Por ejemplo, una consulta a la tabla 'users' para obtener 'reset_code_user' y 'reset_code_exp_user'
+		$response = GetModel::getDataFilter('users', 'reset_code_user, reset_code_exp_user', 'email_user', $email, null, null, null, null);
+		return isset($response[0]) ? (array) $response[0] : null;
+	}
+
+	/*=============================================
+	Método para actualizar la contraseña en la base de datos
+	=============================================*/
+
+	private function updatePasswordInDatabase($email, $newPassword)
+	{
+		$data = array("password_user" => $newPassword);
+		return PutModel::putData("users", $data, $email, "email_user");
+	}
+
+	/*=============================================
 	Respuestas del controlador
 	=============================================*/
 
