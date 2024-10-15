@@ -22,12 +22,12 @@ class EmailSender
         $this->mailer->Host       = 'smtp.hostinger.com';
         $this->mailer->SMTPAuth   = true;
         $this->mailer->Username   = 'jaforero@jdc.edu.co';
-        $this->mailer->Password   = 's';
+        $this->mailer->Password   = '';
         $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $this->mailer->Port       = 465;
         $this->mailer->CharSet    = 'UTF-8';
         $this->mailer->Timeout    = 30;
-        $this->mailer->setFrom('jaforero@jdc.edu.co', 'cambio clave');
+        $this->mailer->setFrom('j@jdc.edu.co', 'cambio clave');
         $this->mailer->isHTML(true);
     }
 
