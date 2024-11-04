@@ -35,8 +35,8 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
         /*=============================================
         Solicitamos respuesta del controlador para eliminar datos en cualquier tabla
-        =============================================*/    
-            
+        =============================================*/
+
         if ($validate == "ok") {
             $response = new DeleteController();
             $response->deleteData($table, $_GET["id"], $_GET["nameId"]);
@@ -44,7 +44,7 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
         /*=============================================
         Error cuando el token ha expirado
-        =============================================*/    
+        =============================================*/
 
         if ($validate == "expired") {
 
@@ -59,7 +59,7 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
         /*=============================================
         Error cuando el token no coincide en BD
-        =============================================*/    
+        =============================================*/
 
         if ($validate == "no-auth") {
 
@@ -72,10 +72,9 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
             return;
         }
 
-    /*=============================================
+        /*=============================================
     Error cuando no envía token
-    =============================================*/    
-
+    =============================================*/
     } else {
 
         $json = array(
@@ -84,6 +83,6 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
         );
 
         echo json_encode($json, http_response_code($json["status"]));
-        return;    
-    }    
+        return;
+    }
 }

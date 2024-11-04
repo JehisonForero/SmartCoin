@@ -1,14 +1,16 @@
-<?php 
+<?php
 
 require_once "connection.php";
 
-class PostModel {
+class PostModel
+{
 
     /*=============================================
     Petición POST para crear datos de forma dinámica
     =============================================*/
 
-    static public function postData($table, $data) {
+    static public function postData($table, $data)
+    {
 
         $columns = "";
         $params = "";
@@ -39,7 +41,5 @@ class PostModel {
         } else {
             return $link->errorInfo();
         }
-
     }
-
 }

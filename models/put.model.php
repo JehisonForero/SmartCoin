@@ -1,22 +1,24 @@
-<?php 
+<?php
 
 require_once "connection.php";
 require_once "get.model.php";
 
-class PutModel {
+class PutModel
+{
 
     /*=============================================
     Petición Put para editar datos de forma dinámica
     =============================================*/
 
-    static public function putData($table, $data, $id, $nameId) {
+    static public function putData($table, $data, $id, $nameId)
+    {
 
         /*=============================================
         Validar el ID
         =============================================*/
 
         $response = GetModel::getDataFilter($table, $nameId, $nameId, $id, null, null, null, null);
-        
+
         if (empty($response)) {
             return null;
         }
@@ -52,7 +54,5 @@ class PutModel {
         } else {
             return $link->errorInfo();
         }
-
     }
-
 }

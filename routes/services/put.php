@@ -8,16 +8,16 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
     /*=============================================
     Capturamos los datos del formulario
     =============================================*/
-    
+
     $data = array();
     parse_str(file_get_contents('php://input'), $data);
-        
+
     /*=============================================
     Separar propiedades en un arreglo
     =============================================*/
 
     $columns = array();
-        
+
     foreach (array_keys($data) as $key => $value) {
         array_push($columns, $value);
     }
@@ -67,15 +67,14 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
             /*=============================================
             Solicitamos respuesta del controlador para crear datos en cualquier tabla
-            =============================================*/        
+            =============================================*/
 
             $response = new PutController();
             $response->putData($table, $data, $_GET["id"], $_GET["nameId"]);
-            
-        /*=============================================
+
+            /*=============================================
         Petición PUT para usuarios autorizados
         =============================================*/
-
         } else {
 
             $tableToken = $_GET["table"] ?? "users";
@@ -85,17 +84,17 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
             /*=============================================
             Solicitamos respuesta del controlador para editar datos en cualquier tabla
-            =============================================*/        
+            =============================================*/
 
             if ($validate == "ok") {
-                
+
                 $response = new PutController();
                 $response->putData($table, $data, $_GET["id"], $_GET["nameId"]);
             }
 
             /*=============================================
             Error cuando el token ha expirado
-            =============================================*/    
+            =============================================*/
 
             if ($validate == "expired") {
 
@@ -110,7 +109,7 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
 
             /*=============================================
             Error cuando el token no coincide en BD
-            =============================================*/    
+            =============================================*/
 
             if ($validate == "no-auth") {
 
@@ -122,13 +121,11 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
                 echo json_encode($json, http_response_code($json["status"]));
                 return;
             }
-
         }
 
-    /*=============================================
+        /*=============================================
     Error cuando no envía token
-    =============================================*/    
-
+    =============================================*/
     } else {
 
         $json = array(
@@ -137,7 +134,6 @@ if (isset($_GET["id"]) && isset($_GET["nameId"])) {
         );
 
         echo json_encode($json, http_response_code($json["status"]));
-        return;    
-    }    
-
+        return;
+    }
 }
