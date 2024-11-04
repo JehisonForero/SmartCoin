@@ -2,50 +2,46 @@
 
 require_once "models/put.model.php";
 
-class PutController{
+class PutController {
 
-	/*=============================================
-	Peticion Put para editar datos
-	=============================================*/
+    /*=============================================
+    Petición Put para editar datos
+    =============================================*/
 
-	static public function putData($table, $data, $id, $nameId){
+    static public function putData($table, $data, $id, $nameId) {
 
-		$response = PutModel::putData($table, $data, $id, $nameId);
-		
-		$return = new PutController();
-		$return -> fncResponse($response);
+        $response = PutModel::putData($table, $data, $id, $nameId);
+        
+        $return = new PutController();
+        $return->fncResponse($response);
 
-	}
+    }
 
-	/*=============================================
-	Respuestas del controlador
-	=============================================*/
+    /*=============================================
+    Respuestas del controlador
+    =============================================*/
 
-	public function fncResponse($response){
+    public function fncResponse($response) {
 
-		if(!empty($response)){
+        if (!empty($response)) {
 
-			$json = array(
+            $json = array(
+                'status' => 200,
+                'results' => $response
+            );
 
-				'status' => 200,
-				'results' => $response
+        } else {
 
-			);
+            $json = array(
+                'status' => 404,
+                'results' => 'Not Found',
+                'method' => 'put'
+            );
 
-		}else{
+        }
 
-			$json = array(
+        echo json_encode($json, http_response_code($json["status"]));
 
-				'status' => 404,
-				'results' => 'Not Found',
-				'method' => 'put'
-
-			);
-
-		}
-
-		echo json_encode($json, http_response_code($json["status"]));
-
-	}
+    }
 
 }

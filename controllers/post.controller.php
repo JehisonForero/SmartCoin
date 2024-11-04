@@ -2,13 +2,16 @@
 
 require_once "models/get.model.php";
 require_once "models/post.model.php";
+require_once "models/put.model.php";
 require_once "models/connection.php";
 
 require_once "vendor/autoload.php";
 
 use Firebase\JWT\JWT;
 
-require_once "models/put.model.php";
+require_once "EmailSender.php";
+
+//require_once "email.php";
 
 class PostController
 {
@@ -182,74 +185,183 @@ class PostController
 			$return->fncResponse($response, "Wrong email", $suffix);
 		}
 	}
-
 	/*=============================================
-	 Método para verificar si el código es válido
+	Metodo para solicitud de recuperacion contraseña
 	=============================================*/
-
-	public function isCodeValid($email, $code)
+	public function postPasswordRecoveryRequest($table, $data, $suffix)
 	{
-		$storedTokenData = $this->getStoredToken($email); // Recuperar el código y la expiración
+		if (!isset($data["email_" . $suffix])) {
+			$this->fncResponse(null, "Email is required", $suffix);
+			return;
+		}
 
-		if ($storedTokenData['reset_code_user'] === $code) {
-			$currentDateTime = date("Y-m-d H:i:s");
-			if ($currentDateTime <= $storedTokenData['reset_code_exp_user']) {
-				return true; // Código válido
+		$user = GetModel::getDataFilter($table, "*", "email_" . $suffix, $data["email_" . $suffix], null, null, null, null);
+
+		if (!empty($user)) {
+			// Generar un código numérico aleatorio de 6 dígitos
+			$code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
+			// Establecer el tiempo de expiración a 1 hora desde ahora
+			$expiration = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+			$updateData = [
+				"reset_code_" . $suffix => $code,
+				"reset_code_exp_" . $suffix => $expiration,
+				"reset_attempts_" . $suffix => 0
+			];
+
+			$update = PutModel::putData($table, $updateData, $user[0]->{"id_" . $suffix}, "id_" . $suffix);
+
+			if (isset($update["comment"]) && $update["comment"] == "The process was successful") {
+				// Crear una instancia de EmailSender
+				$emailSender = new EmailSender();
+
+				// Enviar el correo
+				$emailSent = $emailSender->sendRecoveryCode($data["email_" . $suffix], $code);
+
+				if ($emailSent) {
+
+					error_log("Email enviado correctamente");
+					$this->fncResponse([
+						"message" => "Recovery code sent to your email"
+					], null, $suffix);
+				} else {
+					$this->fncResponse(null, "Error sending email", $suffix);
+				}
 			} else {
-				echo json_encode(['message' => 'Code expired']);
-				return false;
+				$this->fncResponse(null, "Error updating user", $suffix);
 			}
 		} else {
-			echo json_encode(['message' => 'Invalid code']);
-			return false;
+			$this->fncResponse(null, "Email not found", $suffix);
 		}
 	}
-
 	/*=============================================
-	  Maneja la confirmación del reseteo de contraseña
+	Metodo para verificar y validar el codigo enviado
 	=============================================*/
-
-	public function handlePasswordReset()
+	public function postVerifyRecoveryCode($table, $data, $suffix)
 	{
-		if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['code'], $_POST['new_password'])) {
-			$email = $_POST['email'];
-			$code = $_POST['code'];
-			$newPassword = $_POST['new_password'];
+		if (!isset($data["email_user"]) || !isset($data["reset_code_user"])) {
+			$this->fncResponse(null, "Email and reset code are required", $suffix);
+			return;
+		}
 
-			if ($this->isCodeValid($email, $code)) {
-				$hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT); // Hashea la nueva contraseña
-				$this->updatePasswordInDatabase($email, $hashedPassword); // Actualiza la contraseña en la base de datos
-				echo json_encode(['message' => 'Password updated successfully']);
+		$select = "*";
+		$linkTo = "email_user";
+		$equalTo = $data["email_user"];
+		$orderBy = null;
+		$orderMode = null;
+		$startAt = null;
+		$endAt = null;
+
+		$response = new GetController();
+		$userData = $response->getDataClave($table, $select, $linkTo, $equalTo, $orderBy, $orderMode, $startAt, $endAt);
+
+		if (!empty($userData) && is_array($userData) && isset($userData[0])) {
+			$user = $userData[0];
+
+			if ($user->reset_code_user === null || $user->reset_code_exp_user === null) {
+				$this->fncResponse(null, "No reset code found for this user", $suffix);
+				return;
 			}
+
+			if (strtotime($user->reset_code_exp_user) < time()) {
+				$this->fncResponse(null, "Recovery code has expired", $suffix);
+				return;
+			}
+
+			if ($user->reset_attempts_user >= 2) {
+				$this->fncResponse(null, "Max attempts reached. Request a new code.", $suffix);
+				return;
+			}
+
+			if ($data["reset_code_user"] === $user->reset_code_user) {
+				// Código válido, resetear los intentos
+				$updateData = [
+					"reset_attempts_user" => 0
+				];
+				$update = PutModel::putData($table, $updateData, $user->id_user, "id_user");
+
+				if (isset($update["comment"]) && $update["comment"] == "The process was successful") {
+					$this->fncResponse(["message" => "Code verified successfully"], null, $suffix);
+				} else {
+					$this->fncResponse(null, "Error updating user data", $suffix);
+				}
+			} else {
+				// Código inválido, incrementar los intentos
+				$attempts = $user->reset_attempts_user + 1;
+				$updateData = [
+					"reset_attempts_user" => $attempts
+				];
+				$update = PutModel::putData($table, $updateData, $user->id_user, "id_user");
+
+				if (isset($update["comment"]) && $update["comment"] == "The process was successful") {
+					$this->fncResponse(null, "Invalid code", $suffix);
+				} else {
+					$this->fncResponse(null, "Error updating user data", $suffix);
+				}
+			}
+		} else {
+			$this->fncResponse(null, "User not found", $suffix);
 		}
 	}
-
 	/*=============================================
-	Método para obtener el código de reseteo y su expiración de la base de datos
+	Metodo para cambiar la contraseña
 	=============================================*/
-
-	private function getStoredToken($email)
+	public function postChangePassword($table, $data, $suffix)
 	{
-		// Lógica para obtener el token de la base de datos
-		// Por ejemplo, una consulta a la tabla 'users' para obtener 'reset_code_user' y 'reset_code_exp_user'
-		$response = GetModel::getDataFilter('users', 'reset_code_user, reset_code_exp_user', 'email_user', $email, null, null, null, null);
-		return isset($response[0]) ? (array) $response[0] : null;
+		if (!isset($data["email_" . $suffix]) || !isset($data["reset_code_" . $suffix]) || !isset($data["password_" . $suffix])) {
+			$this->fncResponse(null, "Email, reset code, and new password are required", $suffix);
+			return;
+		}
+
+		$user = GetModel::getDataFilter($table, "*", "email_" . $suffix, $data["email_" . $suffix], null, null, null, null);
+
+		if (!empty($user)) {
+			$user = $user[0];
+
+			if (strtotime($user->{"reset_code_exp_" . $suffix}) < time()) {
+				$this->fncResponse(null, "Recovery code has expired", $suffix);
+				return;
+			}
+
+			if ($data["reset_code_" . $suffix] === $user->{"reset_code_" . $suffix}) {
+				// Encriptar la nueva contraseña
+				$crypt = crypt($data["password_" . $suffix], '$2a$07$azybxcags23425sdg23sdfhsd$');
+
+				// Generar nuevo token JWT
+				$token = Connection::jwt($user->{"id_" . $suffix}, $user->{"email_" . $suffix});
+				$jwt = JWT::encode($token, "dfhsdfg34dfchs4xgsrsdry46");
+
+				$updateData = [
+					"password_" . $suffix => $crypt,
+					"reset_code_" . $suffix => null,
+					"reset_code_exp_" . $suffix => null,
+					"reset_attempts_" . $suffix => 0,
+					"token_" . $suffix => $jwt,
+					"token_exp_" . $suffix => $token["exp"]
+				];
+
+				$update = PutModel::putData($table, $updateData, $user->{"id_" . $suffix}, "id_" . $suffix);
+
+				if (isset($update["comment"]) && $update["comment"] == "The process was successful") {
+					$response = [
+						"comment" => "The process was successful",
+						"token" => $jwt
+					];
+					$this->fncResponse($response, null, $suffix);
+				} else {
+					$this->fncResponse(null, "Error updating password", $suffix);
+				}
+			} else {
+				$this->fncResponse(null, "Invalid code", $suffix);
+			}
+		} else {
+			$this->fncResponse(null, "Email not found", $suffix);
+		}
 	}
-
-	/*=============================================
-	Método para actualizar la contraseña en la base de datos
-	=============================================*/
-
-	private function updatePasswordInDatabase($email, $newPassword)
-	{
-		$data = array("password_user" => $newPassword);
-		return PutModel::putData("users", $data, $email, "email_user");
-	}
-
 	/*=============================================
 	Respuestas del controlador
 	=============================================*/
-
 	public function fncResponse($response, $error, $suffix)
 	{
 

@@ -3,174 +3,187 @@
 require_once "models/connection.php";
 require_once "controllers/post.controller.php";
 
-if(isset($_POST)){
+if (isset($_POST)) {
 
-   
-    
-    
-	/*=============================================
+
+
+
+    /*=============================================
 	Separar propiedades en un arreglo
 	=============================================*/
 
-	$columns = array();
-	
-	foreach (array_keys($_POST) as $key => $value) {
+    $columns = array();
 
-		array_push($columns, $value);
-			
-	}
+    foreach (array_keys($_POST) as $key => $value) {
 
-	/*=============================================
+        array_push($columns, $value);
+    }
+
+    /*=============================================
 	Validar la tabla y las columnas
 	=============================================*/
 
-	if(empty(Connection::getColumnsData($table, $columns))){
+    if (empty(Connection::getColumnsData($table, $columns))) {
 
-		$json = array(
-		 	'status' => 400,
-		 	'results' => "Error:Los campos del formulario no coinciden con la base de datos"
-		 	
-		 	
-		);
+        $json = array(
+            'status' => 400,
+            'results' => "Error:Los campos del formulario no coinciden con la base de datos"
 
-		echo json_encode($json, http_response_code($json["status"]));
 
-		return;
+        );
 
-	}
+        echo json_encode($json, http_response_code($json["status"]));
 
-	$response = new PostController();
+        return;
+    }
 
-	/*=============================================
+    $response = new PostController();
+
+    /*=============================================
 	Peticion POST para registrar usuario
-	=============================================*/	
+	=============================================*/
 
-	if(isset($_GET["register"]) && $_GET["register"] == true){
+    if (isset($_GET["register"]) && $_GET["register"] == true) {
 
-		$suffix = $_GET["suffix"] ?? "user";
+        $suffix = $_GET["suffix"] ?? "user";
 
-		$response -> postRegister($table,$_POST,$suffix);
+        $response->postRegister($table, $_POST, $suffix);
 
-	/*=============================================
+        /*=============================================
 	Peticion POST para login de usuario
-	=============================================*/	
+	=============================================*/
+    } else if (isset($_GET["login"]) && $_GET["login"] == true) {
 
-	}else if(isset($_GET["login"]) && $_GET["login"] == true){
+        $suffix = $_GET["suffix"] ?? "user";
 
-		$suffix = $_GET["suffix"] ?? "user";
+        $response->postLogin($table, $_POST, $suffix);
+    }
 
-		$response -> postLogin($table,$_POST,$suffix);
+    /*=============================================
+    Peticion POST para solicitar código de recuperación
+    =============================================*/ else if (isset($_GET["passwordRecoveryRequest"]) && $_GET["passwordRecoveryRequest"] == true) {
+        $suffix = $_GET["suffix"] ?? "user";
+        $response->postPasswordRecoveryRequest($table, $_POST, $suffix);
+    }
 
-	}else{
+    /*=============================================
+    Peticion POST para verificar código de recuperación
+    =============================================*/
+    /*else if(isset($_GET["verifyRecoveryCode"]) && $_GET["verifyRecoveryCode"] == true){
+        $suffix = $_GET["suffix"] ?? "user";
+        $response->postVerifyRecoveryCode($table, $_POST, $suffix);
+    }*/ else if (isset($_GET["verifyRecoveryCode"]) && $_GET["verifyRecoveryCode"] == true) {
+        $suffix = $_GET["suffix"] ?? "user";
+        $response = new PostController();
+        $response->postVerifyRecoveryCode($table, $_POST, $suffix);
+        return;
+    }
+
+    /*=============================================
+    Peticion POST para cambiar contraseña
+    =============================================*/ else if (isset($_GET["changePassword"]) && $_GET["changePassword"] == true) {
+        $suffix = $_GET["suffix"] ?? "user";
+        $response->postChangePassword($table, $_POST, $suffix);
+    } else {
 
 
-		if(isset($_GET["token"])){
+        if (isset($_GET["token"])) {
 
-			/*=============================================
+            /*=============================================
 			Peticion POST para usuarios no autorizados
 			=============================================*/
 
-			if($_GET["token"] == "no" && isset($_GET["except"])){
+            if ($_GET["token"] == "no" && isset($_GET["except"])) {
 
-				/*=============================================
+                /*=============================================
 				Validar la tabla y las columnas
 				=============================================*/
 
-				$columns = array($_GET["except"]);
-                
-				if(empty(Connection::getColumnsData($table, $columns))){
+                $columns = array($_GET["except"]);
 
-					$json = array(
-					 	'status' => 400,
-					 	'results' => "Error: Fields in the form do not match the token"
-					);
+                if (empty(Connection::getColumnsData($table, $columns))) {
 
-					echo json_encode($json, http_response_code($json["status"]));
+                    $json = array(
+                        'status' => 400,
+                        'results' => "Error: Fields in the form do not match the token"
+                    );
 
-					return;
+                    echo json_encode($json, http_response_code($json["status"]));
 
-				}
+                    return;
+                }
 
-				/*=============================================
+                /*=============================================
 				Solicitamos respuesta del controlador para crear datos en cualquier tabla
-				=============================================*/		
+				=============================================*/
 
-				$response -> postData($table,$_POST);
+                $response->postData($table, $_POST);
 
-			/*=============================================
+                /*=============================================
 			Peticion POST para usuarios autorizados
 			=============================================*/
+            } else {
 
-			}else{
+                $tableToken = $_GET["table"] ?? "users";
+                $suffix = $_GET["suffix"] ?? "user";
 
-				$tableToken = $_GET["table"] ?? "users";
-				$suffix = $_GET["suffix"] ?? "user";
+                $validate = Connection::tokenValidate($_GET["token"], $tableToken, $suffix);
 
-				$validate = Connection::tokenValidate($_GET["token"],$tableToken,$suffix);
-
-				/*=============================================
+                /*=============================================
 				Solicitamos respuesta del controlador para crear datos en cualquier tabla
-				=============================================*/		
+				=============================================*/
 
-				if($validate == "ok"){
-		
-					$response -> postData($table,$_POST);
+                if ($validate == "ok") {
 
-				}
+                    $response->postData($table, $_POST);
+                }
 
-				/*=============================================
+                /*=============================================
 				Error cuando el token ha expirado
-				=============================================*/	
+				=============================================*/
 
-				if($validate == "expired"){
+                if ($validate == "expired") {
 
-					$json = array(
-					 	'status' => 303,
-					 	'results' => "Error: The token has expired"
-					);
+                    $json = array(
+                        'status' => 303,
+                        'results' => "Error: The token has expired"
+                    );
 
-					echo json_encode($json, http_response_code($json["status"]));
+                    echo json_encode($json, http_response_code($json["status"]));
 
-					return;
+                    return;
+                }
 
-				}
-
-				/*=============================================
+                /*=============================================
 				Error cuando el token no coincide en BD
-				=============================================*/	
+				=============================================*/
 
-				if($validate == "no-auth"){
+                if ($validate == "no-auth") {
 
-					$json = array(
-					 	'status' => 400,
-					 	'results' => "Error: The user is not authorized"
-					);
+                    $json = array(
+                        'status' => 400,
+                        'results' => "Error: The user is not authorized"
+                    );
 
-					echo json_encode($json, http_response_code($json["status"]));
+                    echo json_encode($json, http_response_code($json["status"]));
 
-					return;
+                    return;
+                }
+            }
 
-				}
-
-			}
-
-		/*=============================================
+            /*=============================================
 		Error cuando no envía token
-		=============================================*/	
+		=============================================*/
+        } else {
 
-		}else{
+            $json = array(
+                'status' => 400,
+                'results' => "Error: Authorization required"
+            );
 
-			$json = array(
-			 	'status' => 400,
-			 	'results' => "Error: Authorization required"
-			);
+            echo json_encode($json, http_response_code($json["status"]));
 
-			echo json_encode($json, http_response_code($json["status"]));
-
-			return;	
-
-		}	
-
-	}
-
+            return;
+        }
+    }
 }
