@@ -63,7 +63,7 @@ class EmailSender
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #FAE816; color: white; text-align: center; padding: 10px; }
+                .header { background-color: #FFC107; color: #000000; text-align: center; padding: 10px; }
                 .content { padding: 20px; background-color: #f4f4f4; }
                 .code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; background-color: #e7e7e7; padding: 10px; }
                 .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }
