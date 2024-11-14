@@ -1,29 +1,27 @@
-<?php
+<?php 
 
 require_once "models/delete.model.php";
 
-class DeleteController
-{
+class DeleteController {
 
     /*=============================================
     Petición Delete para eliminar datos
     =============================================*/
 
-    static public function deleteData($table, $id, $nameId)
-    {
+    static public function deleteData($table, $id, $nameId) {
 
         $response = DeleteModel::deleteData($table, $id, $nameId);
-
+        
         $return = new DeleteController();
         $return->fncResponse($response);
+
     }
 
     /*=============================================
     Respuestas del controlador
     =============================================*/
 
-    public function fncResponse($response)
-    {
+    public function fncResponse($response) {
 
         if (!empty($response)) {
 
@@ -31,6 +29,7 @@ class DeleteController
                 'status' => 200,
                 'results' => $response
             );
+
         } else {
 
             $json = array(
@@ -38,8 +37,11 @@ class DeleteController
                 'results' => 'Not Found',
                 'method' => 'delete'
             );
+
         }
 
         echo json_encode($json, http_response_code($json["status"]));
+
     }
+
 }

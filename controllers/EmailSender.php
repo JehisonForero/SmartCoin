@@ -22,13 +22,13 @@ class EmailSender
         $this->mailer->isSMTP();
         $this->mailer->Host       = 'smtp.hostinger.com';
         $this->mailer->SMTPAuth   = true;
-        $this->mailer->Username   = 'grupo5@ujdc.online';
-        $this->mailer->Password   = '0>MmJ!he3Sd$';
+        $this->mailer->Username   = 'grupo4@ujdc.online';
+        $this->mailer->Password   = '0uEExr?UkRL;';
         $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Cambia a SMTPS
         $this->mailer->Port       = 465;
         $this->mailer->CharSet    = 'UTF-8';
         $this->mailer->Timeout    = 30; // Añade un timeout
-        $this->mailer->setFrom('grupo5@ujdc.online', 'SmartCoin');
+        $this->mailer->setFrom('grupo4@ujdc.online', 'Grupo4_Software2');
         $this->mailer->isHTML(true);
     }
 
@@ -63,7 +63,7 @@ class EmailSender
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #FFC107; color: #000000; text-align: center; padding: 10px; }
+                .header { background-color: #4CAF50; color: white; text-align: center; padding: 10px; }
                 .content { padding: 20px; background-color: #f4f4f4; }
                 .code { font-size: 24px; font-weight: bold; text-align: center; margin: 20px 0; background-color: #e7e7e7; padding: 10px; }
                 .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #777; }

@@ -12,13 +12,13 @@ Cuando no se hace ninguna petición a la API
 
 if (count($routesArray) == 0) {
 
-    $json = array(
-        'status' => 404,
-        'results' => 'Not Found'
-    );
+	$json = array(
+		'status' => 404,
+		'results' => 'Not Found'
+	);
 
-    echo json_encode($json, http_response_code($json["status"]));
-    return;
+	echo json_encode($json, http_response_code($json["status"]));
+	return;
 }
 
 /*=============================================
@@ -27,13 +27,13 @@ Cuando sí se hace una petición a la API
 
 if (count($routesArray) == 1 && isset($_SERVER['REQUEST_METHOD'])) {
 
-    $table = explode("?", $routesArray[1])[0];
+	$table = explode("?", $routesArray[1])[0];
 
-    /*=============================================
+	/*=============================================
     Validar llave secreta
     =============================================*/
 
-    /**if (!isset(getallheaders()["Authorization"]) || getallheaders()["Authorization"] != Connection::apikey()) {
+	/**if (!isset(getallheaders()["Authorization"]) || getallheaders()["Authorization"] != Connection::apikey()) {
 
         if ($table != 'relations' && in_array($table, Connection::publicAccess()) == 0) {
     
@@ -60,35 +60,35 @@ if (count($routesArray) == 1 && isset($_SERVER['REQUEST_METHOD'])) {
     }**/
 
 
-    /*=============================================
+	/*=============================================
     Peticiones GET
     =============================================*/
 
-    if ($_SERVER['REQUEST_METHOD'] == "GET") {
-        include "services/get.php";
-    }
+	if ($_SERVER['REQUEST_METHOD'] == "GET") {
+		include "services/get.php";
+	}
 
-    /*=============================================
+	/*=============================================
     Peticiones POST
     =============================================*/
 
-    if ($_SERVER['REQUEST_METHOD'] == "POST") {
-        include "services/post.php";
-    }
+	if ($_SERVER['REQUEST_METHOD'] == "POST") {
+		include "services/post.php";
+	}
 
-    /*=============================================
+	/*=============================================
     Peticiones PUT
     =============================================*/
 
-    if ($_SERVER['REQUEST_METHOD'] == "PUT") {
-        include "services/put.php";
-    }
+	if ($_SERVER['REQUEST_METHOD'] == "PUT") {
+		include "services/put.php";
+	}
 
-    /*=============================================
+	/*=============================================
     Peticiones DELETE
     =============================================*/
 
-    if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
-        include "services/delete.php";
-    }
+	if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+		include "services/delete.php";
+	}
 }
