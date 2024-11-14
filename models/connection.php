@@ -2,81 +2,81 @@
 
 require_once "get.model.php";
 
-class Connection{
+class Connection
+{
 
 	/*=============================================
 	Información de la base de datos
 	=============================================*/
 
-	static public function infoDatabase(){
+	static public function infoDatabase()
+	{
 
 		$infoDB = array(
 
-			"database" => "u145597152_grupocuatro",
-			"user" => "u145597152_ugrupocuatro",
-			"pass" => 'x+ZI$x[6'
+			"database" => "u145597152_grupocinco2",
+			"user" => "u145597152_ugrupocinco2",
+			"pass" => 'E=VGfw>2'
 
 		);
 
 		return $infoDB;
-
 	}
 
 	/*=============================================
 	APIKEY
 	=============================================*/
 
-	static public function apikey(){
+	static public function apikey()
+	{
 
 		return "c5LTA6WPbMwHhEabYu77nN9cn4VcMj";
-
 	}
 
 	/*=============================================
 	Acceso público
 	=============================================*/
-	static public function publicAccess(){
+	static public function publicAccess()
+	{
 
 		$tables = [];
 
 		return $tables;
-
 	}
 
 	/*=============================================
 	Conexión a la base de datos
 	=============================================*/
 
-	static public function connect(){
+	static public function connect()
+	{
 
 
-		try{
+		try {
 
 			$link = new PDO(
-				"mysql:host=localhost;dbname=".Connection::infoDatabase()["database"],
-				Connection::infoDatabase()["user"], 
+				"mysql:host=localhost;dbname=" . Connection::infoDatabase()["database"],
+				Connection::infoDatabase()["user"],
 				Connection::infoDatabase()["pass"]
 			);
 
 			$link->exec("set names utf8");
+		} catch (PDOException $e) {
 
-		}catch(PDOException $e){
-
-			die("Error: ".$e->getMessage());
-
+			die("Error: " . $e->getMessage());
 		}
 
 		return $link;
-
 	}
 
 	/*=============================================
 	Validar existencia de una tabla en la bd
 	=============================================*/
 
-	static public function getColumnsData($table, $columns){
+	static public function getColumnsData($table, $columns)
+	{
 
-        
+
 		/*=============================================
 		Traer el nombre de la base de datos
 		=============================================*/
@@ -88,27 +88,25 @@ class Connection{
 		=============================================*/
 
 		$validate = Connection::connect()
-		->query("SELECT COLUMN_NAME AS item FROM information_schema.columns WHERE table_schema = '$database' AND table_name = '$table'")
-		->fetchAll(PDO::FETCH_OBJ);
+			->query("SELECT COLUMN_NAME AS item FROM information_schema.columns WHERE table_schema = '$database' AND table_name = '$table'")
+			->fetchAll(PDO::FETCH_OBJ);
 
 		/*=============================================
 		Validamos existencia de la tabla
 		=============================================*/
 
-		if(empty($validate)){
+		if (empty($validate)) {
 
 			return null;
-
-		}else{
+		} else {
 
 			/*=============================================
 			Ajuste de selección de columnas globales
 			=============================================*/
 
-			if($columns[0] == "*"){
-				
-				array_shift($columns);
+			if ($columns[0] == "*") {
 
+				array_shift($columns);
 			}
 
 			/*=============================================
@@ -116,36 +114,31 @@ class Connection{
 			=============================================*/
 
 			$sum = 0;
-				
+
 			foreach ($validate as $key => $value) {
 
-				$sum += in_array($value->item, $columns);	
-				
-						
+				$sum += in_array($value->item, $columns);
 			}
 
 
 
 			return $sum == count($columns) ? $validate : null;
-			
-			
-			
 		}
-
 	}
 
 	/*=============================================
 	Generar Token de Autenticación
 	=============================================*/
 
-	static public function jwt($id, $email){
+	static public function jwt($id, $email)
+	{
 
 		$time = time();
 
 		$token = array(
 
-			"iat" =>  $time,//Tiempo en que inicia el token
-			"exp" => $time + (60*60*24), // Tiempo en que expirará el token (1 día)
+			"iat" =>  $time, //Tiempo en que inicia el token
+			"exp" => $time + (60 * 60 * 24), // Tiempo en que expirará el token (1 día)
 			"data" => [
 
 				"id" => $id,
@@ -161,36 +154,32 @@ class Connection{
 	Validar el token de seguridad
 	=============================================*/
 
-	static public function tokenValidate($token,$table,$suffix){
+	static public function tokenValidate($token, $table, $suffix)
+	{
 
 		/*=============================================
 		Traemos el usuario de acuerdo al token
 		=============================================*/
-		$user = GetModel::getDataFilter($table, "token_exp_".$suffix, "token_".$suffix, $token, null,null,null,null);
-		
-		if(!empty($user)){
+		$user = GetModel::getDataFilter($table, "token_exp_" . $suffix, "token_" . $suffix, $token, null, null, null, null);
+
+		if (!empty($user)) {
 
 			/*=============================================
 			Validamos que el token no haya expirado
-			=============================================*/	
+			=============================================*/
 
 			$time = time();
 
-			if($time < $user[0]->{"token_exp_".$suffix}){
+			if ($time < $user[0]->{"token_exp_" . $suffix}) {
 
 				return "ok";
-
-			}else{
+			} else {
 
 				return "expired";
 			}
-
-		}else{
+		} else {
 
 			return "no-auth";
-
 		}
-
 	}
-
 }
